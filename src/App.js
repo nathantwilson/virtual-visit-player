@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import "./App.css";
 
 import video from "./assets/video.mp4";
+import reverse from "./assets/reverse.mp4";
 import useVideoPlayer from "./hooks/usePlayer";
 
 import {
@@ -19,7 +20,20 @@ import {
 } from "react-icons/bi";
 
 const App = () => {
-  const videoElement = useRef(null);
+  const [videoFile, setVideoFile] = useState(video);
+  const [videoForward, setVideoForward] = useState(true);
+
+  const handleVideoForward = () => {
+    setVideoFile(video);
+    setVideoForward(true);
+  };
+
+  const handleVideoBackward = () => {
+    setVideoFile(reverse);
+    setVideoForward(false);
+  };
+
+  const videoElement = useRef();
   const {
     playerState,
     togglePlay,
@@ -33,7 +47,7 @@ const App = () => {
       <div className="video-wrapper">
         <div className="video-wrapper">
           <video
-            src={video}
+            src={videoFile}
             ref={videoElement}
             onTimeUpdate={handleOnTimeUpdate}
           />
@@ -61,19 +75,45 @@ const App = () => {
             </button>
           </div>
           <div className="actions">
-            <button onClick={togglePlay}>
-              <i>
-                <BiCaretLeft />
-              </i>
-            </button>
+            {videoForward && (
+              <button onClick={handleVideoBackward}>
+                <i>
+                  <BiCaretLeft />
+                </i>
+              </button>
+            )}
+            {!videoForward && (
+              <button onClick={togglePlay}>
+                {!playerState.isPlaying ? (
+                  <i>
+                    <BiCaretLeft />
+                  </i>
+                ) : (
+                  <i>
+                    <BiPause />
+                  </i>
+                )}
+              </button>
+            )}
           </div>
-          <input
-            type="range"
-            min="0"
-            max="100"
-            value={playerState.progress}
-            onChange={(e) => handleVideoProgress(e)}
-          />
+          {videoForward && (
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={playerState.progress}
+              onChange={(e) => handleVideoProgress(e)}
+            />
+          )}
+          {!videoForward && (
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value={100 - playerState.progress}
+              onChange={(e) => handleVideoProgress(e)}
+            />
+          )}
           <select
             className="velocity"
             value={playerState.speed}
@@ -85,17 +125,26 @@ const App = () => {
             <option value="2">2x</option>
           </select>
           <div className="actions">
-            <button onClick={togglePlay}>
-              {!playerState.isPlaying ? (
+            {!videoForward && (
+              <button onClick={handleVideoForward}>
                 <i>
                   <BiCaretRight />
                 </i>
-              ) : (
-                <i>
-                  <BiPause />
-                </i>
-              )}
-            </button>
+              </button>
+            )}
+            {videoForward && (
+              <button onClick={togglePlay}>
+                {!playerState.isPlaying ? (
+                  <i>
+                    <BiCaretRight />
+                  </i>
+                ) : (
+                  <i>
+                    <BiPause />
+                  </i>
+                )}
+              </button>
+            )}
           </div>
           <div className="actions">
             <button>
